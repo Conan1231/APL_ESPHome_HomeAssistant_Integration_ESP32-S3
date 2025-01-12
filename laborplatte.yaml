@@ -36,6 +36,7 @@ i2c:
     scl: 16
     scan: true
 
+# TCA9548A Multiplexer
 tca9548a:
   - address: 0x70
     id: multiplex0
@@ -50,15 +51,180 @@ tca9548a:
       - bus_id: multiplex0channel3
         channel: 3
 
+
 sensor:
+# BME680 - Air Quality Sensor (Channel 0, Address 0x77)
   - platform: bme680
     temperature:
       name: "Temperature Channel 0"
+      id: bme680_temperature
     humidity:
       name: "Humidity Channel 0"
+      id: bme680_humidity
     pressure:
       name: "Pressure Channel 0"
     gas_resistance:
       name: "Gas Resistance Channel 0"
     address: 0x77
     i2c_id: multiplex0channel0
+
+# SGP40 - VOC Sensor (Channel 0, Address 0x59)
+  - platform: sgp4x
+    voc:
+      name: "VOC Index"
+    compensation:
+      humidity_source: bme680_humidity
+      temperature_source: bme680_temperature
+    i2c_id: multiplex0channel0
+
+# SCD41 - CO2 Sensor (Channel 0, Address 0x62)
+  - platform: scd4x
+    temperature:
+      name: "CO2 Sensor Temperature"
+    humidity:
+      name: "CO2 Sensor Humidity"
+    co2:
+      name: "CO2 Concentration"
+    address: 0x62
+    i2c_id: multiplex0channel0
+
+  # TSL2591 - Ambient Light Sensor (Channel 0, Address 0x29)
+  - platform: tsl2591
+    address: 0x29
+    i2c_id: multiplex0channel0
+    name: "Ambient Light Channel 0"
+    update_interval: 60s
+    gain: auto
+    device_factor: 53
+    glass_attenuation_factor: 14.4
+    visible:
+      name: "TSL2591 visible light"
+    infrared:
+      name: "TSL2591 infrared light"
+    full_spectrum:
+      name: "TSL2591 full spectrum light"
+    calculated_lux:
+      id: i_lux
+      name: "TSL2591 Lux"
+    actual_gain:
+      id: "actual_gain"
+      name: "TSL2591 actual gain"
+
+  # Light and Proximity Sensors
+  - platform: apds9960
+    type: CLEAR
+    name: "APDS9960 Clear Channel"
+  - platform: apds9960
+    type: RED
+    name: "APDS9960 Red Channel"
+  - platform: apds9960
+    type: GREEN
+    name: "APDS9960 Green Channel"
+  - platform: apds9960
+    type: BLUE
+    name: "APDS9960 Blue Channel"
+  - platform: apds9960
+    type: PROXIMITY
+    name: "APDS9960 Proximity"
+
+# MPR121 Component Capacitive Touch Sensor
+# MPR121 Component
+mpr121:
+  id: mpr121_component
+  address: 0x5A
+  i2c_id: multiplex0channel0  # Link to the TCA9548A Channel 0
+  touch_debounce: 1
+  release_debounce: 1
+  touch_threshold: 10
+  release_threshold: 7
+
+# Binary Sensors for MPR121 Channels
+binary_sensor:
+  - platform: mpr121
+    id: touch_key0
+    channel: 0
+    name: "Touch Key 0"
+    touch_threshold: 12
+    release_threshold: 6
+
+  - platform: mpr121
+    id: touch_key1
+    channel: 1
+    name: "Touch Key 1"
+
+  - platform: mpr121
+    id: touch_key2
+    channel: 2
+    name: "Touch Key 2"
+
+  - platform: mpr121
+    id: touch_key3
+    channel: 3
+    name: "Touch Key 3"
+
+  - platform: mpr121
+    id: touch_key4
+    channel: 4
+    name: "Touch Key 4"
+
+  - platform: mpr121
+    id: touch_key5
+    channel: 5
+    name: "Touch Key 5"
+
+  - platform: mpr121
+    id: touch_key6
+    channel: 6
+    name: "Touch Key 6"
+
+  - platform: mpr121
+    id: touch_key7
+    channel: 7
+    name: "Touch Key 7"
+
+  - platform: mpr121
+    id: touch_key8
+    channel: 8
+    name: "Touch Key 8"
+
+  - platform: mpr121
+    id: touch_key9
+    channel: 9
+    name: "Touch Key 9"
+
+  - platform: mpr121
+    id: touch_key10
+    channel: 10
+    name: "Touch Key 10"
+
+  - platform: mpr121
+    id: touch_key11
+    channel: 11
+    name: "Touch Key 11"
+
+# Gesture Detection
+  - platform: apds9960
+    direction: UP
+    name: "APDS9960 Gesture Up"
+  - platform: apds9960
+    direction: DOWN
+    name: "APDS9960 Gesture Down"
+  - platform: apds9960
+    direction: LEFT
+    name: "APDS9960 Gesture Left"
+  - platform: apds9960
+    direction: RIGHT
+    name: "APDS9960 Gesture Right"
+
+# APDS9960 Sensor Component
+apds9960:
+  id: apds9960_component
+  address: 0x39
+  i2c_id: multiplex0channel0
+  update_interval: 60s
+  led_drive: 100mA
+  proximity_gain: 4x
+  ambient_light_gain: 4x
+  gesture_led_drive: 100mA
+  gesture_gain: 4x
+  gesture_wait_time: 2.8ms

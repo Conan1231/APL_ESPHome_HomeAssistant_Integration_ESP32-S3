@@ -1,0 +1,98 @@
+views:
+  - title: Laborplatte
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: Sensoren - Luftqualität
+            heading_style: title
+          - type: entities
+            entities:
+              - sensor.laborplatte_co2_concentration
+              - sensor.laborplatte_co2_sensor_humidity
+              - sensor.laborplatte_co2_sensor_temperature
+          - type: entities
+            entities:
+              - entity: sensor.laborplatte_voc_index
+                name: VOC Index (SGP40)
+          - type: entities
+            entities:
+              - sensor.laborplatte_gas_resistance_channel_0
+              - sensor.laborplatte_humidity_channel_0
+              - sensor.laborplatte_pressure_channel_0
+              - sensor.laborplatte_temperature_channel_0
+      - type: grid
+        cards:
+          - type: heading
+            heading: Sensoren
+            heading_style: title
+          - type: entities
+            entities:
+              - sensor.laborplatte_tsl2591_actual_gain
+              - sensor.laborplatte_tsl2591_full_spectrum_light
+              - sensor.laborplatte_tsl2591_infrared_light
+              - sensor.laborplatte_tsl2591_lux
+              - sensor.laborplatte_tsl2591_visible_light
+          - type: heading
+            icon: ''
+            heading: APDS9960 - prox & rgb sensor
+            heading_style: title
+          - type: tile
+            entity: sensor.laborplatte_apds9960_blue_channel
+            name: Blue Channel
+          - type: tile
+            entity: sensor.laborplatte_apds9960_clear_channel
+            name: Clear Channel
+          - type: tile
+            entity: sensor.laborplatte_apds9960_green_channel
+            name: Green Channel
+          - type: tile
+            entity: sensor.laborplatte_apds9960_proximity
+            name: Proximity
+          - type: tile
+            entity: sensor.laborplatte_apds9960_red_channel
+            name: Red Channel
+      - type: grid
+        cards:
+          - type: heading
+            heading_style: title
+            heading: MPR121 Touch Keys
+          - type: tile
+            entity: binary_sensor.laborplatte_touch_key_0
+          - type: tile
+            entity: binary_sensor.laborplatte_touch_key_1
+          - type: tile
+            entity: binary_sensor.laborplatte_touch_key_10
+          - type: tile
+            entity: binary_sensor.laborplatte_touch_key_11
+          - type: tile
+            entity: binary_sensor.laborplatte_touch_key_2
+          - type: tile
+            entity: binary_sensor.laborplatte_touch_key_3
+          - type: tile
+            entity: binary_sensor.laborplatte_touch_key_4
+          - type: tile
+            entity: binary_sensor.laborplatte_touch_key_5
+          - type: tile
+            entity: binary_sensor.laborplatte_touch_key_7
+          - type: tile
+            entity: binary_sensor.laborplatte_touch_key_6
+          - type: tile
+            entity: binary_sensor.laborplatte_touch_key_8
+          - type: tile
+            entity: binary_sensor.laborplatte_touch_key_9
+          - type: heading
+            icon: ''
+            heading: APDS9960 - gesture input
+            heading_style: title
+          - type: tile
+            entity: binary_sensor.laborplatte_apds9960_gesture_down
+          - type: tile
+            entity: binary_sensor.laborplatte_apds9960_gesture_right
+          - type: tile
+            entity: binary_sensor.laborplatte_apds9960_gesture_up
+          - type: tile
+            entity: binary_sensor.laborplatte_apds9960_gesture_left
+    cards: []
+    type: sections
+    max_columns: 4

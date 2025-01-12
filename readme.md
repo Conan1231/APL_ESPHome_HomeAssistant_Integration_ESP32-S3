@@ -376,9 +376,10 @@ binary_sensor:
     - Settings > Devices & services > Add Integration "ESPHome"
 - HA: create new dashboard
     - raw configuration editor
+    - copy/paste content from `raw_configuration_ha.yaml`
 ```yaml
 views:
-  - title: Home
+  - title: Laborplatte
     sections:
       - type: grid
         cards:
@@ -397,7 +398,11 @@ views:
                 name: BME680 Temperature
             title: Laborplatte
     cards: []
+...
+...
 ```
+- Should now be looking something like this:
+![ha_dashboard](ha_dashboard.png)
 
 # Troubleshooting
 - Fixing the I2C Connection Problem
