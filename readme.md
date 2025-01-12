@@ -17,7 +17,7 @@
 
 **I2C - Clients:**
 - OLED Display 128x64
-- Rotary Encoder
+- [Rotary Encoder](https://learn.adafruit.com/adafruit-ano-rotary-navigation-encoder-to-i2c-stemma-qt-adapter?view=all)
     - 5 Tasten
     - Drehrad decrease/increase einer Zahl
 - MPR121
@@ -125,7 +125,7 @@ i2c:
 
 ### Implementing the sensor configuration
 - Just edit: laborplatte.yaml
-- Starting with the I2C definition:
+- Starting with the I2C Multiplexer definition
 
 ---
 **TCA9548A Multiplexer** is an 4-channel I2C multiplexer that allows you to connect multiple I2C devices with the same address to a single I2C bus
@@ -169,8 +169,10 @@ sensor:
   - platform: bme680
     temperature:
       name: "Temperature Channel 0"
+      id: bme680_temperature
     humidity:
       name: "Humidity Channel 0"
+      id: bme680_humidity
     pressure:
       name: "Pressure Channel 0"
     gas_resistance:
@@ -181,7 +183,11 @@ sensor:
 **SGP40 - Gas Sensor**
 - Volatile Organic Compound (VOC) Sensor
 - [ESPHome - SGP40](https://esphome.io/components/sensor/sgp4x.html) 
-- Sensor measures Total VOCs (TVOCs) in indoor environments
+- Sensor outputs a **VOC index** (0 to 500), where 100 represents average air quality.
+    - **100-500**: Air quality is deteriorating.
+    - **0-100**: Air quality is improving.
+    - **VOC Algorithm**:  Sensirion's VOC algorithm runs on an independent microcontroller, processing measured values to calculate a 24-hour average. This average is assigned a VOC index of 100. The algorithm converts measured values into a VOC index within the 0–500 range, updating every second.
+    - **Automatic Humidity Compensation**: The sensor supports automatic humidity compensation. By sending the `sgp40_measure_raw` command with the current relative humidity and temperature (instead of the default 50% and 25°C), accuracy can be improved. Sensirion recommends enabling this feature in dry environments with absolute humidity below **5 g/m³**.
 - VOC: organic chemicals that easily evaporate into the air at room temperature
 - VOC Index Scale:
     - 0-100: Excellent air quality
@@ -199,33 +205,168 @@ sensor:
     - Personal care products
 - Sensor calibration:
     - SGP40 requires several hours of initial runtime to establish accurate baseline readings through self-calibration algorithms. For best results, allow the sensor to calibrate in its intended operating environment
-
+    - I use the BME680 sensor for external calibration
 ```yaml
   - platform: sgp4x
     voc:
       name: "VOC Index"
+    compensation:
+      humidity_source: bme680_humidity
+      temperature_source: bme680_temperature
     i2c_id: multiplex0channel0
 ```
 
 ### Adding the Input Controls
 - gesture and capacitive touch sensors
+- rotary encoder
 
 **MPR121 Touch Sensor**
-- Capacitive Touch Sensor
+- Capacitive Touch Sensor with 12 touch-sensitive inputs
 - [MPR121 - ESPHome](https://esphome.io/components/binary_sensor/mpr121.html)
+- detect touch events on each input pin and publish them as binary sensors in Home Assistant
 
 ```yaml
+# MPR121 Component Capacitive Touch Sensor
+# MPR121 Component
+mpr121:
+  id: mpr121_component
+  address: 0x5A
+  i2c_id: multiplex0channel0  # Link to the TCA9548A Channel 0
+  touch_debounce: 1
+  release_debounce: 1
+  touch_threshold: 10
+  release_threshold: 7
 
+# Binary Sensors for MPR121 Channels
+binary_sensor:
+  - platform: mpr121
+    id: touch_key0
+    channel: 0
+    name: "Touch Key 0"
+    touch_threshold: 12
+    release_threshold: 6
+
+  - platform: mpr121
+    id: touch_key1
+    channel: 1
+    name: "Touch Key 1"
+
+  - platform: mpr121
+    id: touch_key2
+    channel: 2
+    name: "Touch Key 2"
+
+  - platform: mpr121
+    id: touch_key3
+    channel: 3
+    name: "Touch Key 3"
+
+  - platform: mpr121
+    id: touch_key4
+    channel: 4
+    name: "Touch Key 4"
+
+  - platform: mpr121
+    id: touch_key5
+    channel: 5
+    name: "Touch Key 5"
+
+  - platform: mpr121
+    id: touch_key6
+    channel: 6
+    name: "Touch Key 6"
+
+  - platform: mpr121
+    id: touch_key7
+    channel: 7
+    name: "Touch Key 7"
+
+  - platform: mpr121
+    id: touch_key8
+    channel: 8
+    name: "Touch Key 8"
+
+  - platform: mpr121
+    id: touch_key9
+    channel: 9
+    name: "Touch Key 9"
+
+  - platform: mpr121
+    id: touch_key10
+    channel: 10
+    name: "Touch Key 10"
+
+  - platform: mpr121
+    id: touch_key11
+    channel: 11
+    name: "Touch Key 11"
 ```
-
 
 **APDS9960 Sensor**
 - RGB and gesture sensor
 - [APDS9960 - ESPHome](https://esphome.io/components/sensor/apds9960.html)
-
+- multi-function sensor
+- Gesture Detection
+    - recognize simple hand gestures like up, down, left, right
+    - Useful for touchless control interfaces
+    - Works by detecting motion direction using infrared light
+- Proximity Sensing
+- RGB Color Sensing
 ```yaml
+# APDS9960 Sensor Component
+apds9960:
+  id: apds9960_component
+  address: 0x39
+  i2c_id: multiplex0channel0
+  update_interval: 60s
+  led_drive: 100mA
+  proximity_gain: 4x
+  ambient_light_gain: 4x
+  gesture_led_drive: 100mA
+  gesture_gain: 4x
+  gesture_wait_time: 2.8ms
 
+# Light and Proximity Sensors
+sensor:
+  - platform: apds9960
+    type: CLEAR
+    name: "APDS9960 Clear Channel"
+  - platform: apds9960
+    type: RED
+    name: "APDS9960 Red Channel"
+  - platform: apds9960
+    type: GREEN
+    name: "APDS9960 Green Channel"
+  - platform: apds9960
+    type: BLUE
+    name: "APDS9960 Blue Channel"
+  - platform: apds9960
+    type: PROXIMITY
+    name: "APDS9960 Proximity"
+
+# Gesture Detection
+binary_sensor:
+  - platform: apds9960
+    direction: UP
+    name: "APDS9960 Gesture Up"
+  - platform: apds9960
+    direction: DOWN
+    name: "APDS9960 Gesture Down"
+  - platform: apds9960
+    direction: LEFT
+    name: "APDS9960 Gesture Left"
+  - platform: apds9960
+    direction: RIGHT
+    name: "APDS9960 Gesture Right"
 ```
+
+**Rotary Encoder Sensor**
+- [Rotary Encoder Sensor - ESPHome](https://esphome.io/components/sensor/rotary_encoder.html)
+- [Adafruit ANO Rotary Encoder I2C seesaw](https://learn.adafruit.com/adafruit-ano-rotary-navigation-encoder-to-i2c-stemma-qt-adapter?view=all)
+
+- **sadly no I2C support for rotary encoder in ESPHome yet**
+    - https://community.home-assistant.io/t/i2c-rotary-encoder-in-esphome/628966
+
 
 ### Connecting the ESP device to Home Assistant
 - prerequisites:
