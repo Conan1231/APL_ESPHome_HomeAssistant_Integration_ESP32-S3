@@ -8,19 +8,28 @@ views:
             heading_style: title
           - type: entities
             entities:
-              - sensor.laborplatte_co2_concentration
-              - sensor.laborplatte_co2_sensor_humidity
-              - sensor.laborplatte_co2_sensor_temperature
+              - entity: sensor.laborplatte_co2_concentration
+                name: CO2 Concentration
+              - entity: sensor.laborplatte_co2_sensor_humidity
+                name: CO2 Sensor Humidity
+              - entity: sensor.laborplatte_co2_sensor_temperature
+                name: CO2 Sensor Temperature
+            title: SCD41
           - type: entities
             entities:
               - entity: sensor.laborplatte_voc_index
                 name: VOC Index (SGP40)
           - type: entities
             entities:
-              - sensor.laborplatte_gas_resistance_channel_0
-              - sensor.laborplatte_humidity_channel_0
-              - sensor.laborplatte_pressure_channel_0
-              - sensor.laborplatte_temperature_channel_0
+              - entity: sensor.laborplatte_gas_resistance_channel_0
+                name: Gas Resistance
+              - entity: sensor.laborplatte_humidity_channel_0
+                name: Humidity
+              - entity: sensor.laborplatte_pressure_channel_0
+                name: 'Pressure '
+              - entity: sensor.laborplatte_temperature_channel_0
+                name: 'Temperature '
+            title: BME680 - Sensor
       - type: grid
         cards:
           - type: heading
@@ -28,11 +37,17 @@ views:
             heading_style: title
           - type: entities
             entities:
-              - sensor.laborplatte_tsl2591_actual_gain
-              - sensor.laborplatte_tsl2591_full_spectrum_light
-              - sensor.laborplatte_tsl2591_infrared_light
-              - sensor.laborplatte_tsl2591_lux
-              - sensor.laborplatte_tsl2591_visible_light
+              - entity: sensor.laborplatte_tsl2591_actual_gain
+                name: actual gain
+              - entity: sensor.laborplatte_tsl2591_full_spectrum_light
+                name: full spectrum light
+              - entity: sensor.laborplatte_tsl2591_infrared_light
+                name: infrared light
+              - entity: sensor.laborplatte_tsl2591_lux
+                name: Lux
+              - entity: sensor.laborplatte_tsl2591_visible_light
+                name: visible light
+            title: TSL2591
           - type: heading
             icon: ''
             heading: APDS9960 - prox & rgb sensor
@@ -59,40 +74,79 @@ views:
             heading: MPR121 Touch Keys
           - type: tile
             entity: binary_sensor.laborplatte_touch_key_0
+            name: Touch Key 0
           - type: tile
             entity: binary_sensor.laborplatte_touch_key_1
+            name: Touch Key 1
           - type: tile
             entity: binary_sensor.laborplatte_touch_key_10
+            name: Touch Key 10
           - type: tile
             entity: binary_sensor.laborplatte_touch_key_11
+            name: Touch Key 11
           - type: tile
             entity: binary_sensor.laborplatte_touch_key_2
+            name: Touch Key 2
           - type: tile
             entity: binary_sensor.laborplatte_touch_key_3
+            name: Touch Key 3
           - type: tile
             entity: binary_sensor.laborplatte_touch_key_4
+            name: Touch Key 4
           - type: tile
             entity: binary_sensor.laborplatte_touch_key_5
+            name: Touch Key 5
           - type: tile
             entity: binary_sensor.laborplatte_touch_key_7
+            name: Touch Key 7
           - type: tile
             entity: binary_sensor.laborplatte_touch_key_6
+            name: Touch Key 6
           - type: tile
             entity: binary_sensor.laborplatte_touch_key_8
+            name: Touch Key 8
           - type: tile
             entity: binary_sensor.laborplatte_touch_key_9
+            name: Touch Key 9
           - type: heading
             icon: ''
             heading: APDS9960 - gesture input
             heading_style: title
           - type: tile
             entity: binary_sensor.laborplatte_apds9960_gesture_down
+            name: Gesture Down
           - type: tile
             entity: binary_sensor.laborplatte_apds9960_gesture_right
+            name: Gesture Right
           - type: tile
             entity: binary_sensor.laborplatte_apds9960_gesture_up
+            name: ' Gesture Up'
           - type: tile
             entity: binary_sensor.laborplatte_apds9960_gesture_left
+            name: Gesture Left
+      - type: grid
+        cards:
+          - type: heading
+            heading: Visualisation
+            heading_style: title
+          - graph: line
+            type: sensor
+            entity: sensor.laborplatte_voc_index
+            detail: 2
+            grid_options:
+              columns: 12
+              rows: 2
+            unit: VOC
+            name: VOC Index
+          - graph: line
+            type: sensor
+            entity: sensor.laborplatte_co2_concentration
+            detail: 1
+            name: CO2 Concentration
+            grid_options:
+              columns: 12
+              rows: 2
     cards: []
     type: sections
     max_columns: 4
+    badges: []

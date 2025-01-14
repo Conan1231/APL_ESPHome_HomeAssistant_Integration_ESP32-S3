@@ -13,7 +13,7 @@
 # Laborplatte mit ESP + Sensoren
 ![laborplatte mit sensoren](laborplatte.jpeg)
 - **ESP**: BPI-Leaf-S3: basic development board equipped with ESP32-S3R2 chip
-    - with a TCA9548A I²C Multiplexer
+    - with a TCA9548A I²C Multiplexer![alt text](image.png)
 
 **I2C - Clients:**
 - OLED Display 128x64
@@ -181,6 +181,74 @@ sensor:
     address: 0x77
     i2c_id: multiplex0channel0
 ```
+- **Advanced Configuration**: Add indoor air quality (IAQ)
+    - based on the values in the BME680 [BSEC component](https://esphome.io/components/sensor/bme680_bsec#index-for-air-quality-iaq-measurement) index
+
+```yaml
+sensor:
+# BME680 - Air Quality Sensor (Channel 0, Address 0x77)
+  - platform: bme680
+    temperature:
+      name: "Temperature Channel 0"
+      id: bme680_temperature
+    humidity:
+      name: "Humidity Channel 0"
+      id: bme680_humidity
+    pressure:
+      name: "Pressure Channel 0"
+      id: bme680_pressure
+    gas_resistance:
+      name: "Gas Resistance Channel 0"
+      id: bme680_gas_resistance
+    address: 0x77
+    i2c_id: multiplex0channel0
+  # advanced configuration
+  - platform: template
+    name: "BME680 Indoor Air Quality"
+    id: iaq
+    icon: "mdi:gauge"
+    # calculation: comp_gas = log(R_gas[ohm]) + 0.04 log(Ohm)/%rh * hum[%rh]
+    lambda: |-
+      return log(id(bme680_gas_resistance).state) + 0.04 *  id(bme680_humidity).state;
+    state_class: "measurement"
+
+# text sensor for advanced configuration of the bme680 sensor
+text_sensor:
+  - platform: template
+    name: "BME680 IAQ Classification"
+    icon: "mdi:checkbox-marked-circle-outline"
+    lambda: |-
+      if (int(id(iaq).state) <= 50) {
+        return {"Excellent"};
+      }
+      else if (int(id(iaq).state) <= 100) {
+        return {"Good"};
+      }
+      else if (int(id(iaq).state) <= 150) {
+        return {"Lightly polluted"};
+      }
+      else if (int(id(iaq).state) <= 200) {
+        return {"Moderately polluted"};
+      }
+      else if (int(id(iaq).state) <= 250) {
+        return {"Heavily polluted"};
+      }
+      else if (int(id(iaq).state) <= 350) {
+        return {"Severely polluted"};
+      }
+      else if (int(id(iaq).state) <= 500) {
+        return {"Extremely polluted"};
+      }
+      else {
+        return {"unknown"};
+      }
+```
+- Add as "Badge" to the Home Assistant Dashboard
+
+    ![bme680_badge](bme680_badge.png)
+---
+ 
+
 **SGP40 - Gas Sensor**
 - Volatile Organic Compound (VOC) Sensor
 - [ESPHome - SGP40](https://esphome.io/components/sensor/sgp4x.html) 
@@ -216,6 +284,53 @@ sensor:
       temperature_source: bme680_temperature
     i2c_id: multiplex0channel0
 ```
+---
+**SCD4X CO₂ Sensor**
+- CO₂, Temperature and Relative Humidity Sensor
+- [SCD41 - ESPHome](https://esphome.io/components/sensor/scd4x.html#scd4x-co2-temperature-and-relative-humidity-sensor)
+
+```yaml
+sensor:
+# SCD41 - CO2 Sensor (Channel 0, Address 0x62)
+  - platform: scd4x
+    temperature:
+      name: "CO2 Sensor Temperature"
+    humidity:
+      name: "CO2 Sensor Humidity"
+    co2:
+      name: "CO2 Concentration"
+      id: co2_sensor
+    address: 0x62
+    i2c_id: multiplex0channel0
+```
+---
+**TSL2591 - Ambient Light Sensor**
+- [TSL2591 - ESPHome](https://esphome.io/components/sensor/tsl2591.html#tsl2591-ambient-light-sensor)
+
+```yaml
+sensor:
+  - platform: tsl2591
+    address: 0x29
+    i2c_id: multiplex0channel0
+    name: "Ambient Light Channel 0"
+    update_interval: 60s
+    gain: auto
+    device_factor: 53
+    glass_attenuation_factor: 14.4
+    visible:
+      name: "TSL2591 visible light"
+    infrared:
+      name: "TSL2591 infrared light"
+    full_spectrum:
+      name: "TSL2591 full spectrum light"
+    calculated_lux:
+      id: i_lux
+      name: "TSL2591 Lux"
+    actual_gain:
+      id: "actual_gain"
+      name: "TSL2591 actual gain"
+```
+---
 
 ### Adding the Input Controls
 - gesture and capacitive touch sensors
@@ -312,7 +427,14 @@ binary_sensor:
     - Useful for touchless control interfaces
     - Works by detecting motion direction using infrared light
 - Proximity Sensing
+    - PROXIMITY sensor: detects the presence and distance of nearby objects by measuring the reflection of infrared light emitted by the sensor's IR LED
 - RGB Color Sensing
+    - CLEAR channel: measures the total light intensity across the visible spectrum, without distinguishing between colors (ambient brightness)
+    - RED, GREEN, BLUE Channels: measure the intensity of light in the red, green, and blue parts of the visible spectrum
+- Steps to Adjust Sensitivity
+    - by tweaking the ambient light gain and the LED drive level
+    - settings allow to make the sensor more responsive to changes in light intensity
+    - ambient_light_gain: 16x  # Options: 1x, 4x, 16x, 64x (default: 4x)
 ```yaml
 # APDS9960 Sensor Component
 apds9960:
@@ -379,10 +501,16 @@ binary_sensor:
 font:
   - file: "https://github.com/IdreesInc/Monocraft/releases/download/v3.0/Monocraft.ttf"
     id: web_font
-    size: 20
+    size: 9
+  - file:
+      type: gfonts
+      family: Roboto
+      weight: 900
+    id: roboto_16
+    size: 16
 ```
 2. configure i2c display
-- important to set rotation to 90° and offset to 96
+- important to set rotation to 90°/270° and offset to 96
 ```yaml
 # Display: SH1107 128x64-oled
 # Address: 0x3c 
@@ -391,13 +519,43 @@ display:
     i2c_id: bus_a
     address: 0x3c
     id: device_display
-    update_interval: 30s
+    update_interval: 10s
     rotation: 90
     offset_y: 96
     model: "SH1107 128x64"
-    lambda: |- 
-      it.print(0, 0, id(web_font), "Hello World!");
+    pages:
+      - id: page1
+        lambda: |-
+          // Page 1: Temperature, Humidity, Pressure, Gas Resistance
+          it.printf(0, 0, id(web_font), "Temp: %.1f C", id(bme680_temperature).state);
+          it.printf(0, 20, id(web_font), "Humidity: %.1f %%", id(bme680_humidity).state);
+          it.printf(0, 40, id(web_font), "Pressure: %.1f hPa", id(bme680_pressure).state);
+          it.printf(0, 60, id(web_font), "Gas: %.0f Ohm", id(bme680_gas_resistance).state);
+      - id: page2
+        lambda: |-
+          // Page 2: VOC Index and CO2 Levels
+          it.printf(0, 0, id(roboto_16), "VOC Index: %.1f", id(sgp40_voc).state);
+          it.printf(0, 20, id(roboto_16), "CO2: %.1f ppm", id(co2_sensor).state);
+
 ```
+3. switch between pages with touching button
+- add functionality to MPR121 sensor in yaml
+- press button 6 for changing the display page
+```yaml
+sensor:
+  - platform: mpr121
+    id: touch_key6
+    channel: 6
+    name: "Touch Key 6"
+    on_press:
+      then:
+        - display.page.show_next: device_display
+        - component.update: device_display
+```
+![display](display1.jpeg)
+![display](display2.jpeg)
+
+4. for more configuration options look up the official documentation [Display - ESPHome](https://esphome.io/components/display/#display-engine)
 
 ### Connecting the ESP device to Home Assistant
 - prerequisites:
@@ -434,6 +592,8 @@ views:
 ```
 - Should now be looking something like this:
 ![ha_dashboard](ha_dashboard.png)
+- if you click on a specific sensor you can see the value history:
+![voc_index](voc_index.png)
 
 # Troubleshooting
 - Fixing the I2C Connection Problem

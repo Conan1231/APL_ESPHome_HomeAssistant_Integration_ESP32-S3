@@ -63,15 +63,28 @@ sensor:
       id: bme680_humidity
     pressure:
       name: "Pressure Channel 0"
+      id: bme680_pressure
     gas_resistance:
       name: "Gas Resistance Channel 0"
+      id: bme680_gas_resistance
     address: 0x77
     i2c_id: multiplex0channel0
+  # advanced configuration
+  - platform: template
+    name: "BME680 Indoor Air Quality"
+    id: iaq
+    icon: "mdi:gauge"
+    # calculation: comp_gas = log(R_gas[ohm]) + 0.04 log(Ohm)/%rh * hum[%rh]
+    lambda: |-
+      return log(id(bme680_gas_resistance).state) + 0.04 *  id(bme680_humidity).state;
+    state_class: "measurement"
+
 
 # SGP40 - VOC Sensor (Channel 0, Address 0x59)
   - platform: sgp4x
     voc:
       name: "VOC Index"
+      id: sgp40_voc
     compensation:
       humidity_source: bme680_humidity
       temperature_source: bme680_temperature
@@ -85,6 +98,7 @@ sensor:
       name: "CO2 Sensor Humidity"
     co2:
       name: "CO2 Concentration"
+      id: co2_sensor
     address: 0x62
     i2c_id: multiplex0channel0
 
@@ -126,6 +140,38 @@ sensor:
   - platform: apds9960
     type: PROXIMITY
     name: "APDS9960 Proximity"
+
+
+# text sensor for advanced configuration of the bme680 sensor
+text_sensor:
+  - platform: template
+    name: "BME680 IAQ Classification"
+    icon: "mdi:checkbox-marked-circle-outline"
+    lambda: |-
+      if (int(id(iaq).state) <= 50) {
+        return {"Excellent"};
+      }
+      else if (int(id(iaq).state) <= 100) {
+        return {"Good"};
+      }
+      else if (int(id(iaq).state) <= 150) {
+        return {"Lightly polluted"};
+      }
+      else if (int(id(iaq).state) <= 200) {
+        return {"Moderately polluted"};
+      }
+      else if (int(id(iaq).state) <= 250) {
+        return {"Heavily polluted"};
+      }
+      else if (int(id(iaq).state) <= 350) {
+        return {"Severely polluted"};
+      }
+      else if (int(id(iaq).state) <= 500) {
+        return {"Extremely polluted"};
+      }
+      else {
+        return {"unknown"};
+      }
 
 # MPR121 Component Capacitive Touch Sensor
 # MPR121 Component
@@ -176,6 +222,10 @@ binary_sensor:
     id: touch_key6
     channel: 6
     name: "Touch Key 6"
+    on_press:
+      then:
+        - display.page.show_next: device_display
+        - component.update: device_display
 
   - platform: mpr121
     id: touch_key7
@@ -221,10 +271,49 @@ apds9960:
   id: apds9960_component
   address: 0x39
   i2c_id: multiplex0channel0
-  update_interval: 60s
+  update_interval: 20s
   led_drive: 100mA
   proximity_gain: 4x
-  ambient_light_gain: 4x
+  ambient_light_gain: 16x
   gesture_led_drive: 100mA
   gesture_gain: 4x
   gesture_wait_time: 2.8ms
+
+
+
+# Define Font
+font:
+  - file: "https://github.com/IdreesInc/Monocraft/releases/download/v3.0/Monocraft.ttf"
+    id: web_font
+    size: 9
+  - file:
+      type: gfonts
+      family: Roboto
+      weight: 900
+    id: roboto_16
+    size: 16
+
+# Display: SH1107 128x64-oled
+# Address: 0x3c 
+display:
+  - platform: ssd1306_i2c
+    i2c_id: bus_a
+    address: 0x3c
+    id: device_display
+    update_interval: 10s
+    rotation: 270
+    offset_y: 96
+    model: "SH1107 128x64"
+    pages:
+      - id: page1
+        lambda: |-
+          // Page 1: Temperature, Humidity, Pressure, Gas Resistance
+          it.printf(0, 0, id(web_font), "Temp: %.1f C", id(bme680_temperature).state);
+          it.printf(0, 18, id(web_font), "Humidity: %.1f %%", id(bme680_humidity).state);
+          it.printf(0, 38, id(web_font), "Pressure: %.1f hPa", id(bme680_pressure).state);
+          it.printf(0, 50, id(web_font), "Gas: %.0f Ohm", id(bme680_gas_resistance).state);
+      - id: page2
+        lambda: |-
+          // Page 2: VOC Index and CO2 Levels
+          it.printf(0, 0, id(roboto_16), "VOC Index: %.1f", id(sgp40_voc).state);
+          it.printf(0, 20, id(roboto_16), "CO2: %.1f ppm", id(co2_sensor).state);
