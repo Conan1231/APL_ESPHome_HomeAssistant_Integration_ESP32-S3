@@ -11,7 +11,7 @@
     - Home Assistant Core: 2024.12.4
 
 # Laborplatte mit ESP + Sensoren
-![laborplatte mit sensoren](laborplatte.jpeg)
+![laborplatte mit sensoren](pictures/laborplatte.jpeg)
 - **ESP**: BPI-Leaf-S3: basic development board equipped with ESP32-S3R2 chip
     - with a TCA9548A I²C Multiplexer![alt text](image.png)
 
@@ -245,7 +245,7 @@ text_sensor:
 ```
 - Add as "Badge" to the Home Assistant Dashboard
 
-    ![bme680_badge](bme680_badge.png)
+    ![bme680_badge](pictures/bme680_badge.png)
 ---
  
 
@@ -552,8 +552,8 @@ sensor:
         - display.page.show_next: device_display
         - component.update: device_display
 ```
-![display](display1.jpeg)
-![display](display2.jpeg)
+![display](pictures/display1.jpeg)
+![display](pictures/display2.jpeg)
 
 4. for more configuration options look up the official documentation [Display - ESPHome](https://esphome.io/components/display/#display-engine)
 
@@ -591,9 +591,9 @@ views:
 ...
 ```
 - Should now be looking something like this:
-![ha_dashboard](ha_dashboard.png)
+![ha_dashboard](pictures/ha_dashboard.png)
 - if you click on a specific sensor you can see the value history:
-![voc_index](voc_index.png)
+![voc_index](pictures/voc_index.png)
 
 # Troubleshooting
 - Fixing the I2C Connection Problem
