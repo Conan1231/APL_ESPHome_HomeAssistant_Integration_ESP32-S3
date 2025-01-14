@@ -17,6 +17,7 @@
 
 **I2C - Clients:**
 - OLED Display 128x64
+    - Adafruit FeatherWing OLED
 - [Rotary Encoder](https://learn.adafruit.com/adafruit-ano-rotary-navigation-encoder-to-i2c-stemma-qt-adapter?view=all)
     - 5 Tasten
     - Drehrad decrease/increase einer Zahl
@@ -367,6 +368,36 @@ binary_sensor:
 - **sadly no I2C support for rotary encoder in ESPHome yet**
     - https://community.home-assistant.io/t/i2c-rotary-encoder-in-esphome/628966
 
+### Configure OLED-Display
+- Adafruit FeatherWing OLED (128x64)
+    - model: SH1107 128x64-oled
+- [SH1107 I2C - ESPHome](https://esphome.io/components/display/ssd1306.html#over-i2c)
+
+1. define a font
+```yaml
+# Define Font
+font:
+  - file: "https://github.com/IdreesInc/Monocraft/releases/download/v3.0/Monocraft.ttf"
+    id: web_font
+    size: 20
+```
+2. configure i2c display
+- important to set rotation to 90° and offset to 96
+```yaml
+# Display: SH1107 128x64-oled
+# Address: 0x3c 
+display:
+  - platform: ssd1306_i2c
+    i2c_id: bus_a
+    address: 0x3c
+    id: device_display
+    update_interval: 30s
+    rotation: 90
+    offset_y: 96
+    model: "SH1107 128x64"
+    lambda: |- 
+      it.print(0, 0, id(web_font), "Hello World!");
+```
 
 ### Connecting the ESP device to Home Assistant
 - prerequisites:
