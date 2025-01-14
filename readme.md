@@ -288,6 +288,14 @@ text_sensor:
 **SCD4X CO₂ Sensor**
 - CO₂, Temperature and Relative Humidity Sensor
 - [SCD41 - ESPHome](https://esphome.io/components/sensor/scd4x.html#scd4x-co2-temperature-and-relative-humidity-sensor)
+- safe levels of CO2 in rooms:
+
+    | **Gas** | **Concentration**       | **Effects**                                                                                     |
+    |---------|--------------------------|-------------------------------------------------------------------------------------------------|
+    | CO2     | 250-400 ppm             | Normal background concentration in outdoor ambient air                                         |
+    | CO2     | 400-1,000 ppm           | Concentrations typical of occupied indoor spaces with good air exchange                        |
+    | CO2     | 1,000-2,000 ppm         | Complaints of drowsiness and poor air                                                          |
+    | CO2     | 2,000-5,000 ppm         | Headaches, sleepiness, stagnant, stale, stuffy air. Poor concentration, loss of attention, increased heart rate, and slight nausea may also be present |
 
 ```yaml
 sensor:
