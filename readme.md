@@ -116,6 +116,8 @@ captive_portal:
 ## Creating the yaml in ESPHome configuration
 1. Define the I²C bus in the configuration
     - to find out the correct GPIO-Pins: look at Troubleshooting below
+    - **OR** just lookup the schematics... [BPI-Leaf-S3 - Github](https://github.com/BPI-STEAM/BPI-Leaf-S3-Doc/blob/main/sch/BPI-Leaf-S3-Chip-V1.1-SCH.pdf)
+      - GPIO: 15/16
 ```yaml
 i2c:
   sda: GPIOXX
@@ -602,6 +604,18 @@ views:
 ![ha_dashboard](pictures/ha_dashboard.png)
 - if you click on a specific sensor you can see the value history:
 ![voc_index](pictures/voc_index.png)
+
+# To-Do List / Known Bugs
+- **Issue**: OLED display connected via I2C to ESP32 does not work after a restart or power cycle.
+  - **Symptoms**: The display functions correctly when the ESP32 is freshly flashed with the ESPHome YAML configuration.
+After restarting the ESP32 or cutting and restoring power, the display remains black.
+  - **Possible Fix**: Some OLED displays need a proper reset sequence, especially after power loss
+  --> configure the correct RESET pin [ESPHome - ssd1306](https://esphome.io/components/display/ssd1306.html#over-i2c)
+- **Issue**: periodically appearing warnings in the LOG
+  - **Possible Causes & Fixes**:
+    - I2C Bus Congestion: reduce update frequency of some of the I2C clients in ESPHome (update_interval).
+    - I2C Speed: Increasing the I2C clock speed in ESPHome, e.g., i2c: frequency: 400kHz (default is 50kHz).
+![log_warning](pictures/log.png)
 
 # Troubleshooting
 - Fixing the I2C Connection Problem
