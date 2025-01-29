@@ -13,7 +13,7 @@
 # Laborplatte mit ESP + Sensoren
 ![laborplatte mit sensoren](pictures/laborplatte.jpeg)
 - **ESP**: BPI-Leaf-S3: basic development board equipped with ESP32-S3R2 chip
-    - with a TCA9548A I²C Multiplexer![alt text](image.png)
+    - with a TCA9548A I²C Multiplexer!
 
 **I2C - Clients:**
 - OLED Display 128x64
@@ -23,9 +23,6 @@
     - Drehrad decrease/increase einer Zahl
 - MPR121
     - 12 Touch-Tasten
-    - simple test py script geht nicht
-        - Datei "mpr121_simpletest_mux.py", Zeile 17, in <module> 
-        - ValueError: IO16 in Benutzung
 - ST25DV16k
     - https://www.st.com/en/nfc/st25dv16k.html
     - NFC Tag
